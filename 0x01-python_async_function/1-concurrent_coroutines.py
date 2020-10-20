@@ -15,5 +15,5 @@ async def wait_n(n: int, max_delay: int) -> List[float]:
     concurrency."""
     list_of_delays: List[float] = []
     for _ in range(n):
-        list_of_delays.append(wait_random(max_delay))
+        list_of_delays.append(await wait_random(max_delay))
     return sorted(list_of_delays)
