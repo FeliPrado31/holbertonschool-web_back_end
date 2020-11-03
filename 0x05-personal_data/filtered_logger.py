@@ -4,6 +4,8 @@
 import re
 from typing import List
 import logging
+import mysql.connector
+from os import getenv
 
 PII_FIELDS = ('name', 'email', 'phone', 'ssn', 'password')
 
@@ -52,3 +54,45 @@ def get_logger() -> logging.Logger:
     handler.setFormatter(RedactingFormatter(PII_FIELDS))
     logger.addHandler(handler)
     return logger
+
+
+def get_db() -> mysql.connector.connection.MySQLConnection:
+    """Connect to secure database
+        returns a connector to the database
+    """
+    return mysql.connector.connect(
+        host=os.environ.get('PERSONAL_DATA_DB_HOST', 'localhost'),
+        database=os.environ.get('PERSONAL_DATA_DB_NAME', 'root'),
+        user=os.environ.get('PERSONAL_DATA_DB_USERNAME'),
+        password=os.environ.get('PERSONAL_DATA_DB_PASSWORD', ''))
+
+
+def main():
+    """Read and filter data
+    Implement a main function that takes no arguments and returns nothing.
+    """
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users;")
+
+    result = cursor.fetchall()
+    for data in result:
+        message = f"name={data[0]}; " + \
+                  f"email={data[1]}; " + \
+                  f"phone={data[2]}; " + \
+                  f"ssn={data[3]}; " + \
+                  f"password={data[4]}; " + \
+                  f"ip={data[5]}; " + \
+                  f"last_login={data[6]}; " + \
+                  f"user_agent={data[7]};"
+        print(message)
+        log_record = logging.LogRecord("my_logger", logging.INFO,
+                                       None, None, message, None, None)
+        formatter = RedactingFormatter(PII_FIELDS)
+        formatter.format(log_record)
+    cursor.close()
+    db.close()
+
+
+if __name__ == '__main__':
+    main()
