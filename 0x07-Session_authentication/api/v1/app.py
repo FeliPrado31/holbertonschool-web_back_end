@@ -51,12 +51,13 @@ def before_request() -> None:
     """ Before request
     """
     paths = ['/api/v1/status/', '/api/v1/unauthorized/',
-             '/api/v1/forbidden/']
+             '/api/v1/forbidden/', '/api/v1/auth_session/login/']
     if not auth:
-        return None
+        return
     if not auth.require_auth(request.path, paths):
-        return None
-    if not auth.authorization_header(request):
+        return
+    if not auth.authorization_header(request)\
+       and not auth.session_cookie(request):
         abort(401)
     if not auth.current_user(request):
         abort(403)
