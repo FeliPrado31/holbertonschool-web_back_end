@@ -15,6 +15,7 @@ class DB:
     """
 
     def __init__(self):
+        """Create engine"""
         self._engine = create_engine("sqlite:///a.db")
         Base.metadata.drop_all(self._engine)
         Base.metadata.create_all(self._engine)
@@ -22,14 +23,15 @@ class DB:
 
     @property
     def _session(self):
+        """ Create session """
         if self.__session is None:
             DBSession = sessionmaker(bind=self._engine)
             self.__session = DBSession()
         return self.__session
 
     def add_user(self, email: str, hashed_password: str) -> TypeVar('User'):
-        """save the user to the database"""
+        """ Add a user instance to the session DB """
         user = User(email=email, hashed_password=hashed_password)
-        self._session.add(u)
+        self._session.add(user)
         self._session.commit()
         return user
