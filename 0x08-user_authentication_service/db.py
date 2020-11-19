@@ -16,7 +16,7 @@ class DB:
 
     def __init__(self):
         """Create engine"""
-        self._engine = create_engine("sqlite:///a.db")
+        self._engine = create_engine('sqlite:///a.db')
         Base.metadata.drop_all(self._engine)
         Base.metadata.create_all(self._engine)
         self.__session = None
@@ -35,3 +35,10 @@ class DB:
         self._session.add(user)
         self._session.commit()
         return user
+
+    def find_user_by(self, **kwargs: dict) -> object:
+        """
+            returns the first row found in the users table
+            as filtered by the method’s input arguments
+        """
+        return self._session.query(User).filter_by(**kwargs).first()
