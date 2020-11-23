@@ -4,27 +4,29 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import sessionmaker
 from typing import TypeVar
-from user import Base, User
+
+from user import Base
+from user import User
 
 
 class DB:
-    """
+    """ Database class
         Creates engine, session, adds user object to DB
     """
 
     def __init__(self):
-        """Create engine"""
-        self._engine = create_engine('sqlite:///a.db')
+        """ constructor"""
+        self._engine = create_engine("sqlite:///a.db")
         Base.metadata.drop_all(self._engine)
         Base.metadata.create_all(self._engine)
         self.__session = None
 
     @property
     def _session(self):
-        """ Create session """
+        """create session """
         if self.__session is None:
             DBSession = sessionmaker(bind=self._engine)
             self.__session = DBSession()
@@ -38,8 +40,7 @@ class DB:
         return user
 
     def find_user_by(self, **kwargs: dict) -> object:
-        """
-            returns the first row found in the users table
+        """ returns the first row found in the users table
             as filtered by the method’s input arguments
         """
         return self._session.query(User).filter_by(**kwargs).first()
@@ -49,8 +50,8 @@ class DB:
             then commit changes to the database
         """
         user = self.find_user_by(id=user_id)
-        for key, val in kwargs.items():
-            if not hasattr(user, key):
+        for i, j in kwargs.items():
+            if not hasattr(user, i):
                 raise ValueError
-            setattr(user, key, val)
+            setattr(user, i, j)
         self._session.commit()
