@@ -15,6 +15,9 @@ from user import User
 class DB:
     """ Database class
         Creates engine, session, adds user object to DB
+        Methods:
+            add_user - save the user object to the database
+            find_user_by - returns the first row found in the users table
     """
 
     def __init__(self):
@@ -49,9 +52,9 @@ class DB:
         """ update the user’s attributes as passed in the method’s arguments
             then commit changes to the database
         """
-        user = self.find_user_by(id=user_id)
-        for i, j in kwargs.items():
-            if not hasattr(user, i):
+        u = self.find_user_by(id=user_id)
+        for key, val in kwargs.items():
+            if not hasattr(u, key):
                 raise ValueError
-            setattr(user, i, j)
+            setattr(u, key, val)
         self._session.commit()
