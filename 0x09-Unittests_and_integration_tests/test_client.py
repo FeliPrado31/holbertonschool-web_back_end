@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """ python basic unittest """
 import unittest
+import requests
 from parameterized import parameterized
 from unittest.mock import patch, Mock, PropertyMock
 from client import GithubOrgClient
+from urllib.error import HTTPError
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -12,7 +14,7 @@ class TestGithubOrgClient(unittest.TestCase):
         ("google"),
         ("abc"),
     ])
-    @patch("client.get_json", return_value=[{"payload": True}])
+    @patch("client.get_json", return_value={"payload": True})
     def test_org(self, org_name, mock_get):
         """test_org"""
         test_client = GithubOrgClient(org_name)
@@ -55,3 +57,18 @@ class TestGithubOrgClient(unittest.TestCase):
         test_client = GithubOrgClient("twitter")
         test_return = test_client.has_license(repo, license_key)
         self.assertEqual(expected_return, test_return)
+
+
+@parameterized.expand([
+])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """ class TestIntegrationGithubOrgClient """
+    @classmethod
+    def setUpClass(cls):
+        """set up class"""
+        cls.get_patcher = patch('requests.get', side_effect=HTTPError)
+
+    @classmethod
+    def tearDownClass(cls):
+        """tear down class"""
+        cls.get_patcher.stop()
