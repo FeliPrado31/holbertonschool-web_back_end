@@ -1,71 +1,57 @@
 #!/usr/bin/env python3
 """ python basic unittest """
 import unittest
-from utils import access_nested_map, get_json, memoize
 from parameterized import parameterized
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, PropertyMock
+from client import GithubOrgClient
 
 
-class TestAccessNestedMap(unittest.TestCase):
-    """ testing utils.access_nested_map """
+class TestGithubOrgClient(unittest.TestCase):
+    """TestGithubOrgClient"""
     @parameterized.expand([
-        ({"a": 1}, ("a",), 1),
-        ({"a": {"b": 2}}, ("a",), {"b": 2}),
-        ({"a": {"b": 2}}, ("a", "b"), 2),
+        ("google"),
+        ("abc"),
     ])
-    def test_access_nested_map(self, nested_map, path, answer):
-        """ test that the method returns what it is supposed to"""
-        self.assertEqual(access_nested_map(nested_map, path), answer)
+    @patch("client.get_json", return_value=[{"payload": True}])
+    def test_org(self, org_name, mock_get):
+        """test_org"""
+        test_client = GithubOrgClient(org_name)
+        test_return = test_client.org
+        self.assertEqual(test_return, mock_get.return_value)
+        mock_get.assert_called_once
+
+    def test_public_repos_url(self):
+        """ test GithubOrgClient._public_repos_url"""
+        with patch.object(GithubOrgClient,
+                          "org",
+                          new_callable=PropertyMock,
+                          return_value={"repos_url": "twitter"}) as mock_get:
+            test_json = {"repos_url": "twitter"}
+            test_client = GithubOrgClient(test_json.get("repos_url"))
+            test_return = test_client._public_repos_url
+            mock_get.assert_called_once
+            self.assertEqual(test_return,
+                             mock_get.return_value.get("repos_url"))
+
+    @patch("client.get_json", return_value=[{"name": "twitter"}])
+    def test_public_repos(self, mock_get):
+        """test GithubOrgClient.public_repos"""
+        with patch.object(GithubOrgClient,
+                          "_public_repos_url",
+                          new_callable=PropertyMock,
+                          return_value="https://api.github.com/") as mock_pub:
+            test_client = GithubOrgClient("twitter")
+            test_return = test_client.public_repos()
+            self.assertEqual(test_return, ["twitter"])
+            mock_get.assert_called_once
+            mock_pub.assert_called_once
 
     @parameterized.expand([
-        ({}, ("a",)),
-        ({"a": 1}, ("a", "b")),
+        ({"license": {"key": "my_license"}}, "my_license", True),
+        ({"license": {"key": "other_license"}}, "my_license", False),
     ])
-    def test_access_nested_map_exception(self, nested_map, path):
-        """ test that a KeyError is raised properly"""
-        with self.assertRaises(KeyError) as error:
-            access_nested_map(nested_map, path)
-        self.assertEqual(error.exception.args[0], path[-1])
-
-
-class TestGetJson(unittest.TestCase):
-    """mock testing HTTP calls"""
-
-    @parameterized.expand([
-        ("http://example.com", {"payload": True}),
-        ("http://holberton.io", {"payload": False}),
-    ])
-    @patch('test_utils.get_json')
-    def test_get_json(self, test_url, test_payload, mock_get):
-        """ test the output of the func """
-        mock_get.return_value = test_payload
-        actual_result = get_json(test_url)
-        self.assertEqual(actual_result, test_payload)
-
-
-class TestMemoize(unittest.TestCase):
-    """testing with memoization """
-
-    def test_memoize(self):
-        """ testing memoize decorator"""
-        class TestClass:
-            """ Test Class
-                Methods:
-                    a_method, a_property
-            """
-
-            def a_method(self):
-                """ a_method"""
-                return 42
-
-            @memoize
-            def a_property(self):
-                """ a_property"""
-                return self.a_method()
-
-        with patch.object(TestClass, "a_method",
-                          return_value=42) as mock_method:
-            test_class = TestClass()
-            test_class.a_property
-            test_class.a_property
-            mock_method.assert_called_once
+    def test_has_license(self, repo, license_key, expected_return):
+        """ test GithubOrgClient.has_license"""
+        test_client = GithubOrgClient("twitter")
+        test_return = test_client.has_license(repo, license_key)
+        self.assertEqual(expected_return, test_return)
