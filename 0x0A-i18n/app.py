@@ -8,14 +8,13 @@ from flask_babel import Babel, gettext
 import pytz
 import datetime
 
-
 app = Flask(__name__)
 
 
 @app.route('/')
 def index():
     """hello world"""
-    return render_template("index.html")
+    return render_template("0-index.html", message="Welcome to Holberton")
 
 
 if __name__ == "__main__":
