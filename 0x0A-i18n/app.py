@@ -2,11 +2,8 @@
 """
 0x0A. i18n
 """
-from flask import Flask, render_template, request, g
+from flask import Flask, render_template
 from os import getenv
-from flask_babel import Babel, gettext
-import pytz
-import datetime
 
 app = Flask(__name__)
 
