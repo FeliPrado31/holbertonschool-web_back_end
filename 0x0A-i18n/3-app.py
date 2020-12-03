@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+"""
+Route module for the API
+"""
 from flask import Flask, render_template, request
 from os import getenv
 from flask_babel import Babel, gettext
