@@ -127,3 +127,7 @@ dmypy.json
 .pyre/
 .vscode/*
 Hibernate/
+
+
+# Nodejs
+node_modules
