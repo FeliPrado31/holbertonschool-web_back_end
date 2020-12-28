@@ -1,32 +1,34 @@
-import Currency from './3-currency'; // eslint-disable-line
+import Currency from './3-currency';
 
-export default class Pricing {
+class Pricing {
   constructor(amount, currency) {
-    this._amount = amount;
-    this._currency = currency;
+    this.amount = amount;
+    this.currency = currency;
   }
 
   get amount() {
     return this._amount;
   }
 
+  set amount(amount) {
+    if (typeof amount === 'number') this._amount = amount;
+  }
+
   get currency() {
     return this._currency;
   }
 
-  set amount(newAmount) {
-    this._amount = newAmount;
-  }
-
-  set currency(newCurrency) {
-    this._currency = newCurrency;
+  set currency(currency) {
+    if (currency instanceof Currency) this._currency = currency;
   }
 
   displayFullPrice() {
-    return `${this.amount} (${this.currency.displayFullCurrency()})`;
+    return `${this.amount} ${this.currency.name} (${this.currency.code})`;
   }
 
   static convertPrice(amount, conversionRate) {
     return amount * conversionRate;
   }
 }
+
+export default Pricing;
