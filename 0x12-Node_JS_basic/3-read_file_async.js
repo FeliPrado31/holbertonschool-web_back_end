@@ -1,32 +1,41 @@
 const fs = require("fs");
 
-const countStudents = (path) => {
-  const promise = (response, reject) => {
-    fs.readFile(path, (err, data) => {
-      if (err) reject(Error("Cannot load the database"));
-      if (data) {
-        let res = data.toString().split("\n");
-        res = res.slice(1, res.length - 1);
-        console.log(`Number of students: ${res.length}`);
-        const arrOfClass = {};
-        for (const row of res) {
-          const student = row.split(",");
-          if (!arrOfClass[student[3]]) arrOfClass[student[3]] = [];
-          arrOfClass[student[3]].push(student[0]);
-        }
-        for (const cls in arrOfClass) {
-          if (cls)
+const countStudents = (path) =>
+  new Promise((resolve, reject) => {
+    fs.readFile(path, (error, csvData) => {
+      if (error) {
+        reject(Error("Cannot load the database"));
+      }
+      if (csvData) {
+        const fields = {};
+        let data = csvData.toString().split("\n");
+        data = data.filter((element) => element.length > 0);
+        data.shift();
+
+        data.forEach((element) => {
+          if (element.length > 0) {
+            const row = element.split(",");
+            if (row[3] in fields) {
+              fields[row[3]].push(row[0]);
+            } else {
+              fields[row[3]] = [row[0]];
+            }
+          }
+        });
+        console.log(`Number of students: ${data.length}`);
+        for (const field in fields) {
+          if (field) {
+            const list = fields[field];
             console.log(
-              `Number of students in ${cls}: ${
-                arrOfClass[cls].length
-              }. List: ${arrOfClass[cls].join(", ")}`
+              `Number of students in ${field}: ${
+                list.length
+              }. List: ${list.toString().replace(/,/g, ", ")}`
             );
+          }
         }
       }
-      response();
+      resolve();
     });
-  };
-  return new Promise(promise);
-};
+  });
 
 module.exports = countStudents;
