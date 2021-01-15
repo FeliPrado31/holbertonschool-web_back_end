@@ -1,32 +1,30 @@
-const express = require("express");
-const countStudents = require("./3-read_file_async");
+const express = require('express');
+const fs = require('fs');
 
-const app = express();
-const PORT = 12345;
+const countStudents = async (path) => {
+  try {
+    const csvData = await fs.promises.readFile(path, { encoding: 'utf8' });
+    const fields = {};
+    const dataShow = {};
+    let data = csvData.toString().split('\n');
+    data = data.filter((element) => element.length > 0);
 
-app.get("/", (req, res) => res.send("Hello Holberton School!"));
-app.get("/students", (req, res) => {
-  countStudents(String(process.argv.slice(2)))
-    .then((arrOfClass) => {
-      res.write("This is the list of our students\n");
-      res.write(`Number of students: ${arrOfClass.count}\n`);
-      for (const data in arrOfClass) {
-        if (data && data !== "count")
-          res.write(
-            `Number of students in ${data}: ${
-              arrOfClass[data].length
-            }. List: ${arrOfClass[data].join(", ")}\n`
-          );
+    data.shift();
+    data.forEach((element) => {
+      if (element.length > 0) {
+        const row = element.split(',');
+        if (row[3] in fields) {
+          fields[row[3]].push(row[0]);
+        } else {
+          fields[row[3]] = [row[0]];
+        }
       }
-      res.end();
-    })
-    .catch((err) => {
-      throw err;
     });
-});
-app.listen(PORT);
-
-module.exports = app;
+    dataShow.numberStudents = `Number of students: ${data.length}`;
+    dataShow.studentsFields = [];
+    for (const field in fields) {
+      if (field) {
+        const list = fields[field];
         dataShow.studentsFields.push(`Number of students in ${field}: ${list.length}. List: ${list.toString().replace(/,/g, ', ')}`);
       }
     }
