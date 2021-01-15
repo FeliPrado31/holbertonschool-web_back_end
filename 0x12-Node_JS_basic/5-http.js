@@ -34,3 +34,29 @@ const app = http.createServer((req, res) => {
 app.listen(PORT);
 
 module.exports = app;
+w Error('Cannot load the database');
+  }
+};
+const hostname = 'localhost';
+const port = 1245;
+
+const app = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  if (req.url === '/') res.end('Hello Holberton School!');
+  if (req.url === '/students') {
+    res.write('This is the list of our students\n');
+    countStudents(process.argv[2]).then((dataShow) => {
+      res.write([dataShow.numberStudents].concat(dataShow.studentsFields).join('\n'));
+      res.end('\n');
+    }).catch((error) => {
+      res.end(error.message);
+    });
+  }
+});
+
+app.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+
+module.exports = app;
