@@ -22,9 +22,14 @@ describe("calculateNumber", () => {
   it("negative numbers", () => {
     assert.equal(calculateNumber(-1, 1), 0);
     assert.equal(calculateNumber(-1.5, 0), -1);
+    assert.strictEqual(calculateNumber(2), 2);
+    assert.strictEqual(calculateNumber(2.7), 3);
   });
   it("checks arguments", () => {
     assert.equal(isNaN(calculateNumber(2.2)), true);
     assert.equal(isNaN(calculateNumber()), true);
+    assert.strictEqual(calculateNumber(true, "3"), 4);
+    assert.strictEqual(calculateNumber(1, "3.7"), 5);
+    assert.strictEqual(calculateNumber("1.2", 3.7), 5);
   });
 });
